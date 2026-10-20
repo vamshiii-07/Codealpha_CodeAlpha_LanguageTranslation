@@ -39,6 +39,7 @@ if st.button("Translate"):
     elif source == target:
         st.warning("Choose different languages.")
     else:
+        
         try:
             result = GoogleTranslator(
                 source=languages[source],
@@ -49,8 +50,11 @@ if st.button("Translate"):
             st.text_area("Result", value=result)
 
         except Exception as e:
-    st.error("Translation failed.")
-    st.write("Error details:", str(e))
+            st.error("Translation failed.")
+            st.write("Error details:", str(e))
+            
+
+        
     
             
             
