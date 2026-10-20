@@ -48,8 +48,11 @@ if st.button("Translate"):
             st.subheader("Translated Text")
             st.text_area("Result", value=result)
 
-        except Exception:
-            st.error(
-                "Translation failed. Please check your internet."
-            )
+        except Exception as e:
+    st.error("Translation failed.")
+    st.write("Error details:", str(e))
+    
+            
+            
+            
 
