@@ -1,6 +1,7 @@
 
+            
 import streamlit as st
-from deep_translator import GoogleTranslator
+import requests
 
 st.set_page_config(
     page_title="AI Language Translator",
@@ -22,15 +23,9 @@ languages = {
 
 text = st.text_area("Enter your text:")
 
-source = st.selectbox(
-    "Translate from:",
-    list(languages.keys())
-)
-
+source = st.selectbox("Translate from:", list(languages.keys()))
 target = st.selectbox(
-    "Translate to:",
-    list(languages.keys()),
-    index=1
+    "Translate to:", list(languages.keys()), index=1
 )
 
 if st.button("Translate"):
@@ -39,20 +34,37 @@ if st.button("Translate"):
     elif source == target:
         st.warning("Choose different languages.")
     else:
-        
         try:
-            result = GoogleTranslator(
-                source=languages[source],
-                target=languages[target]
-            ).translate(text)
+            response = requests.get(
+                "https://api.mymemory.translated.net/get",
+                params={
+                    "q": text,
+                    "langpair": (
+                        f"{languages[source]}|{languages[target]}"
+                    )
+                },
+                timeout=20
+            )
+            response.raise_for_status()
+            data = response.json()
 
-            st.subheader("Translated Text")
-            st.text_area("Result", value=result)
+            if data.get("responseStatus") == 200:
+                result = data["responseData"]["translatedText"]
+                st.subheader("Translated Text")
+                st.text_area("Result", value=result)
+            else:
+                st.error(
+                    "Translation service limit reached "
+                    "or request failed. Please try later."
+                )
 
-        except Exception as e:
-            st.error("Translation failed.")
-            st.write("Error details:", str(e))
-            
+        except requests.RequestException:
+            st.error(
+                "Network error. Please try again later."
+            )
+        except (KeyError, ValueError):
+            st.error("Unexpected translation response.")
+
 
         
     
